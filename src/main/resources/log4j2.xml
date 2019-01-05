@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="error" strict="true">
+  <Properties>
+      <Property name="filename">logs/iq-puzzler.log</Property>
+  </Properties>
+
+  <Appenders>
+      <Appender type="Console" name="STDOUT">
+          <Layout type="PatternLayout" pattern="%m%n"/>
+      </Appender>
+      <Appender type="File" name="FILE" fileName="${filename}">
+          <Layout type="PatternLayout">
+              <Pattern>%m%n</Pattern>
+          </Layout>
+      </Appender>
+  </Appenders>
+
+  <Loggers>
+      <Root level="info">
+          <AppenderRef ref="STDOUT"/>
+          <AppenderRef ref="FILE"/>
+      </Root>
+  </Loggers>
+</Configuration>
