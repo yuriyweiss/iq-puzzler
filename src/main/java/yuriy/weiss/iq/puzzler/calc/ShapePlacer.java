@@ -2,6 +2,7 @@ package yuriy.weiss.iq.puzzler.calc;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import yuriy.weiss.iq.puzzler.PuzzlerException;
 import yuriy.weiss.iq.puzzler.calc.strategy.BoardPreparationStrategy;
 import yuriy.weiss.iq.puzzler.kpi.KpiHolder;
 import yuriy.weiss.iq.puzzler.model.Board;
@@ -10,9 +11,11 @@ import yuriy.weiss.iq.puzzler.model.Shape;
 import yuriy.weiss.iq.puzzler.model.ShapeVariant;
 import yuriy.weiss.iq.puzzler.model.State;
 import yuriy.weiss.iq.puzzler.model.UsedShape;
+import yuriy.weiss.iq.puzzler.multithreading.ShapePlacerMode;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,17 +23,25 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static yuriy.weiss.iq.puzzler.model.Constants.PRINT_SEPARATOR;
+import static yuriy.weiss.iq.puzzler.multithreading.ShapePlacerMode.PRODUCER;
 
 public class ShapePlacer {
 
     private static final Logger logger = LogManager.getLogger();
 
+    private final CalcEngine calcEngine;
     private final State state;
     private final BoardPreparationStrategy boardPreparationStrategy;
+    private final int producerThreshold;
+    private final ShapePlacerMode shapePlacerMode;
 
-    public ShapePlacer( State state, BoardPreparationStrategy boardPreparationStrategy ) {
+    public ShapePlacer( CalcEngine calcEngine, State state, BoardPreparationStrategy boardPreparationStrategy,
+            ShapePlacerMode shapePlacerMode ) {
+        this.calcEngine = calcEngine;
         this.state = state;
         this.boardPreparationStrategy = boardPreparationStrategy;
+        this.producerThreshold = calcEngine.getProducerThreashold();
+        this.shapePlacerMode = shapePlacerMode;
     }
 
     /**
@@ -47,7 +58,13 @@ public class ShapePlacer {
      */
     public State tryPlaceNotUsedShapes() {
         if ( state.getNotUsedShapes().isEmpty() ) {
-            throw new PlacementException( "tryPlaceNotUsedShapes must have at least 1 not used shape to process" );
+            throw new PuzzlerException( "tryPlaceNotUsedShapes must have at least 1 not used shape to process" );
+        }
+
+        // success state was already reached, stop execution
+        if ( calcEngine.getSuccessState() != null ) {
+            logStoppingExecutionOnSuccess();
+            return null;
         }
 
         logProcessingState( state );
@@ -126,12 +143,26 @@ public class ShapePlacer {
             }
             List<Cell> variantPlacements = possiblePlacement.getValue();
             for ( Cell variantPlacement : variantPlacements ) {
+                // success state was already reached, stop execution
+                if ( calcEngine.getSuccessState() != null ) {
+                    logStoppingExecutionOnSuccess();
+                    return null;
+                }
                 State stateToCheck = prepareStateToCheck( state, shape, shapeVariant, variantPlacement );
+                // when success, there will be only one variant placement
                 if ( stateToCheck.getNotUsedShapes().isEmpty() ) {
                     stateToCheck.setPlacementSuccess( true );
                     return stateToCheck;
                 }
-                State result = new ShapePlacer( stateToCheck, boardPreparationStrategy ).tryPlaceNotUsedShapes();
+                // when called from producer, puts state to queue for consumers
+                if ( shapePlacerMode == PRODUCER && stateToCheck.getNotUsedShapes().size() <= producerThreshold ) {
+                    putStateToQueue( stateToCheck );
+                    logger.debug( "{} ShapePlacer state put to queue", shapePlacerMode );
+                    return null;
+                }
+                // when called from consumer, performs full execution chain until result
+                State result = new ShapePlacer( calcEngine, stateToCheck,
+                        boardPreparationStrategy, shapePlacerMode ).tryPlaceNotUsedShapes();
                 if ( result != null && result.isPlacementSuccess() ) {
                     return result;
                 }
@@ -150,6 +181,14 @@ public class ShapePlacer {
         return new State( newBoard, newNotUsedShapes );
     }
 
+    private void putStateToQueue( State state ) {
+        try {
+            calcEngine.getStateQueue().put( state );
+        } catch ( InterruptedException e ) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
     private void logProcessingState( State state ) {
         logger.debug( PRINT_SEPARATOR );
         logger.debug( "PROCESSING STATE" );
@@ -163,5 +202,9 @@ public class ShapePlacer {
         logger.debug( PRINT_SEPARATOR );
         logger.debug( "PLACEMENT FAILED" );
         logger.debug( state.getBoard().print() );
+    }
+
+    private void logStoppingExecutionOnSuccess() {
+        logger.info( "{} SUCCESS state reached, stopping execution of {}", new Date(), shapePlacerMode );
     }
 }
