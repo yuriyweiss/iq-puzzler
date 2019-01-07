@@ -15,6 +15,12 @@ public class AverageTimeKpi {
     }
 
     public double getValue() {
-        return ( ( double ) totalTime.get() ) / totalCount.get();
+        long count = totalCount.get();
+        long time = totalTime.get();
+        if ( count == 0 ) {
+            return 0;
+        } else {
+            return ( ( double ) time ) / count;
+        }
     }
 }

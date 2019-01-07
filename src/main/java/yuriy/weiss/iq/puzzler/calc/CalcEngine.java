@@ -37,8 +37,9 @@ public class CalcEngine {
 
     private volatile State successState = null;
 
-    public CalcEngine( BoardPreparationStrategy boardPreparationStrategy, int producerThreashold, int threadPoolSize ) {
-        board = new Board( 11, 5 );
+    public CalcEngine( Board board, BoardPreparationStrategy boardPreparationStrategy, int producerThreashold,
+            int threadPoolSize ) {
+        this.board = board;
         notUsedShapes.addAll( ShapesRegistry.getShapes() );
         this.boardPreparationStrategy = boardPreparationStrategy;
         this.producerThreashold = producerThreashold;
