@@ -70,9 +70,15 @@ public class ShapePlacer {
             return null;
         }
 
-        logProcessingState( state );
-
         boardPreparationStrategy.prepareBoardBeforePlacement( state.getBoard() );
+        KpiHolder.getTotalStatesKpi().inc();
+        // filtering unsatisfactory states critically decreases calculation
+        if ( state.isUnsatisfactory() ) {
+            KpiHolder.getUnsatisfactoryStatesKpi().inc();
+            return null;
+        }
+
+        logProcessingState( state );
 
         Map<ShapeVariant, List<Cell>> possiblePlacements = buildPossiblePlacementsForEachVariant( state );
         logger.debug( "possiblePlacements: {}", possiblePlacements );
@@ -218,6 +224,6 @@ public class ShapePlacer {
     }
 
     private void logStoppingExecutionOnSuccess() {
-        logger.info( "SUCCESS state reached, stopping execution of {}", shapePlacerMode );
+        logger.debug( "SUCCESS state reached, stopping execution of {}", shapePlacerMode );
     }
 }

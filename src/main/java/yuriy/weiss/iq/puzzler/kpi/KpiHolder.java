@@ -4,6 +4,8 @@ public class KpiHolder {
     private static CountKpi variantCanBePlacedKpi = new CountKpi();
     private static CountKpi statesProducedKpi = new CountKpi();
     private static CountKpi statesConsumedKpi = new CountKpi();
+    private static CountKpi unsatisfactoryStatesKpi = new CountKpi();
+    private static CountKpi totalStatesKpi = new CountKpi();
     private static TimeKpi preparationTimeKpi = new TimeKpi();
     private static AverageTimeKpi consumerStateAvgTimeKpi = new AverageTimeKpi();
 
@@ -28,5 +30,13 @@ public class KpiHolder {
 
     public static AverageTimeKpi getConsumerStateAvgTimeKpi() {
         return consumerStateAvgTimeKpi;
+    }
+
+    public static CountKpi getUnsatisfactoryStatesKpi() {
+        return unsatisfactoryStatesKpi;
+    }
+
+    public static CountKpi getTotalStatesKpi() {
+        return totalStatesKpi;
     }
 }

@@ -3,7 +3,6 @@ package yuriy.weiss.iq.puzzler.calc;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import yuriy.weiss.iq.puzzler.calc.strategy.BoardPreparationStrategy;
-import yuriy.weiss.iq.puzzler.kpi.KpiHolder;
 import yuriy.weiss.iq.puzzler.model.Board;
 import yuriy.weiss.iq.puzzler.model.Shape;
 import yuriy.weiss.iq.puzzler.model.ShapesRegistry;
@@ -76,8 +75,7 @@ public class CalcEngine {
     public void onStateSuccess() {
         logger.info( PRINT_SEPARATOR );
         logger.info( "PLACEMENT SUCCESS" );
-        logger.info( "[{}] variantCanBePlaced called", KpiHolder.getVariantCanBePlacedKpi().getValue() );
-        logger.info( "[{}] preparation time", KpiHolder.getPreparationTimeKpi().getValue() );
+        LogTimerTask.logKpis( this );
         logger.info( successState.getBoard().print() );
 
         threadPool.shutdownNow();
