@@ -115,7 +115,7 @@ public class Board {
             }
             sb.append( "\n" );
         }
-        return sb.toString();
+        return "\n" + sb.toString();
     }
 
     private void replaceSymbols( String[][] symbols, UsedShape usedShape ) {

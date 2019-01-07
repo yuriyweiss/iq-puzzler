@@ -7,9 +7,6 @@ import yuriy.weiss.iq.puzzler.calc.strategy.CheckAreasStrategy;
 import yuriy.weiss.iq.puzzler.model.ShapesRegistry;
 import yuriy.weiss.iq.puzzler.model.UsedShape;
 
-import java.util.Date;
-import java.util.Timer;
-
 public class Application {
 
     private static final Logger logger = LogManager.getLogger();
@@ -38,7 +35,7 @@ public class Application {
     }
 
     private static void solvePuzzle( String puzzleId ) {
-        logger.info( "starting {}", new Date() );
+        logger.info( "starting" );
 
         CalcEngine calcEngine = new CalcEngine( new CheckAreasStrategy(), 2, 3 );
         // CalcEngine calcEngine = new CalcEngine( new WholeBoardStrategy(), 4 )
@@ -46,10 +43,8 @@ public class Application {
         addUsedShapesForPuzzle( puzzleId, calcEngine );
 
         calcEngine.printBoard();
-        Timer timer = new Timer();
-        timer.scheduleAtFixedRate( new LogTimerTask(), 5000L, 5000L );
 
-        logger.info( "{} started", new Date() );
+        logger.info( "started" );
         calcEngine.startPlacementThreads();
     }
 

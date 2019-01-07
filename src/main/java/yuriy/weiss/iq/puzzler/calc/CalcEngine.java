@@ -13,8 +13,8 @@ import yuriy.weiss.iq.puzzler.multithreading.StateConsumer;
 import yuriy.weiss.iq.puzzler.multithreading.StateProducer;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.Timer;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -34,8 +34,9 @@ public class CalcEngine {
 
     private ArrayBlockingQueue<State> stateQueue = new ArrayBlockingQueue<>( 1000 );
     private ExecutorService threadPool;
+    private Timer logTimer;
 
-    private State successState = null;
+    private volatile State successState = null;
 
     public CalcEngine( BoardPreparationStrategy boardPreparationStrategy, int producerThreashold, int threadPoolSize ) {
         board = new Board( 11, 5 );
@@ -58,13 +59,18 @@ public class CalcEngine {
     }
 
     public void startPlacementThreads() {
+        // create and start producer thread
         StateProducer stateProducer = new StateProducer( this, new State( board, notUsedShapes ),
                 boardPreparationStrategy );
         Thread stateProducerThread = new Thread( stateProducer );
         stateProducerThread.start();
+        // create consumers pool
         for ( int i = 0; i < threadPoolSize; i++ ) {
             threadPool.execute( new StateConsumer( this, boardPreparationStrategy, i ) );
         }
+        // create log timer
+        logTimer = new Timer();
+        logTimer.scheduleAtFixedRate( new LogTimerTask(), 5000L, 5000L );
     }
 
     public void onStateSuccess() {
@@ -74,18 +80,21 @@ public class CalcEngine {
         logger.info( "[{}] preparation time", KpiHolder.getPreparationTimeKpi().getValue() );
         logger.info( "[{}] placement time", KpiHolder.getPlacementTimeKpi().getValue() );
         logger.info( successState.getBoard().print() );
+
+        threadPool.shutdownNow();
+        logTimer.cancel();
     }
 
-    public synchronized void setSuccessState( State successState ) {
+    public void setSuccessState( State successState ) {
         this.successState = successState;
     }
 
-    public synchronized State getSuccessState() {
+    public State getSuccessState() {
         return successState;
     }
 
     public void onProducerFinish() {
-        logger.info( "{} PRODUCER FINISHED", new Date() );
+        logger.info( "PRODUCER FINISHED" );
     }
 
     public ArrayBlockingQueue<State> getStateQueue() {
@@ -97,6 +106,6 @@ public class CalcEngine {
     }
 
     public void onConsumerFinish( int consumerId ) {
-        logger.info( "{} CONSUMER FINISHED {}", new Date(), consumerId );
+        logger.info( "CONSUMER FINISHED {}", consumerId );
     }
 }

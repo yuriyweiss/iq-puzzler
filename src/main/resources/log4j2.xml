@@ -2,20 +2,26 @@
 <Configuration status="error" strict="true">
   <Properties>
       <Property name="filename">logs/iq-puzzler.log</Property>
+      <Property name="messageLayout">%d{yyyy.MM.dd HH:mm:ss,SSS} [%20.20t] %-5p %m%n</Property>
   </Properties>
 
   <Appenders>
       <Appender type="Console" name="STDOUT">
+          <Layout type="PatternLayout" pattern="${messageLayout}"/>
+      </Appender>
+      <Appender type="Console" name="STDOUT_SIMPLE">
           <Layout type="PatternLayout" pattern="%m%n"/>
       </Appender>
       <Appender type="File" name="FILE" fileName="${filename}">
-          <Layout type="PatternLayout">
-              <Pattern>%m%n</Pattern>
-          </Layout>
+          <Layout type="PatternLayout" pattern="${messageLayout}"/>
       </Appender>
   </Appenders>
 
   <Loggers>
+      <Logger name="yuriy.weiss.iq.puzzler.model.ShapesRegistry" level="info" additivity="false">
+          <AppenderRef ref="STDOUT_SIMPLE"/>
+      </Logger>
+
       <Root level="info">
           <AppenderRef ref="STDOUT"/>
           <AppenderRef ref="FILE"/>

@@ -1,5 +1,7 @@
 package yuriy.weiss.iq.puzzler.calc;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import yuriy.weiss.iq.puzzler.PuzzlerException;
@@ -15,7 +17,6 @@ import yuriy.weiss.iq.puzzler.multithreading.ShapePlacerMode;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,8 @@ import static yuriy.weiss.iq.puzzler.multithreading.ShapePlacerMode.PRODUCER;
 public class ShapePlacer {
 
     private static final Logger logger = LogManager.getLogger();
+
+    private static final Boolean NEED_BREAK = Boolean.TRUE;
 
     private final CalcEngine calcEngine;
     private final State state;
@@ -143,32 +146,40 @@ public class ShapePlacer {
             }
             List<Cell> variantPlacements = possiblePlacement.getValue();
             for ( Cell variantPlacement : variantPlacements ) {
-                // success state was already reached, stop execution
-                if ( calcEngine.getSuccessState() != null ) {
-                    logStoppingExecutionOnSuccess();
-                    return null;
-                }
-                State stateToCheck = prepareStateToCheck( state, shape, shapeVariant, variantPlacement );
-                // when success, there will be only one variant placement
-                if ( stateToCheck.getNotUsedShapes().isEmpty() ) {
-                    stateToCheck.setPlacementSuccess( true );
-                    return stateToCheck;
-                }
-                // when called from producer, puts state to queue for consumers
-                if ( shapePlacerMode == PRODUCER && stateToCheck.getNotUsedShapes().size() <= producerThreshold ) {
-                    putStateToQueue( stateToCheck );
-                    logger.debug( "{} ShapePlacer state put to queue", shapePlacerMode );
-                    return null;
-                }
-                // when called from consumer, performs full execution chain until result
-                State result = new ShapePlacer( calcEngine, stateToCheck,
-                        boardPreparationStrategy, shapePlacerMode ).tryPlaceNotUsedShapes();
-                if ( result != null && result.isPlacementSuccess() ) {
-                    return result;
+                Pair<State, Boolean> result = processVariantPlacement( state, shape, shapeVariant, variantPlacement );
+                // return from method only if special conditions fired or success state reached
+                if ( result.getRight() == NEED_BREAK ) {
+                    return result.getLeft();
                 }
             }
         }
         return null;
+    }
+
+    private Pair<State, Boolean> processVariantPlacement( State state, Shape shape, ShapeVariant shapeVariant,
+            Cell variantPlacement ) {
+        // success state was already reached, stop execution
+        if ( calcEngine.getSuccessState() != null ) {
+            logStoppingExecutionOnSuccess();
+            return new ImmutablePair<>( null, NEED_BREAK );
+        }
+        State stateToCheck = prepareStateToCheck( state, shape, shapeVariant, variantPlacement );
+        // when success, there will be only one variant placement
+        if ( stateToCheck.getNotUsedShapes().isEmpty() ) {
+            stateToCheck.setPlacementSuccess( true );
+            return new ImmutablePair<>( stateToCheck, NEED_BREAK );
+        }
+        // when called from producer, puts state to queue for consumers
+        if ( shapePlacerMode == PRODUCER && stateToCheck.getNotUsedShapes().size() <= producerThreshold ) {
+            putStateToQueue( stateToCheck );
+            logger.debug( "{} ShapePlacer state put to queue", shapePlacerMode );
+            return new ImmutablePair<>( null, NEED_BREAK );
+        }
+        // when called from consumer, performs full execution chain until result
+        State result = new ShapePlacer( calcEngine, stateToCheck,
+                boardPreparationStrategy, shapePlacerMode ).tryPlaceNotUsedShapes();
+        Boolean needBreak = result != null && result.isPlacementSuccess();
+        return new ImmutablePair<>( result, needBreak );
     }
 
     private State prepareStateToCheck( State state, Shape shape, ShapeVariant shapeVariant, Cell variantPlacement ) {
@@ -205,6 +216,6 @@ public class ShapePlacer {
     }
 
     private void logStoppingExecutionOnSuccess() {
-        logger.info( "{} SUCCESS state reached, stopping execution of {}", new Date(), shapePlacerMode );
+        logger.info( "SUCCESS state reached, stopping execution of {}", shapePlacerMode );
     }
 }
