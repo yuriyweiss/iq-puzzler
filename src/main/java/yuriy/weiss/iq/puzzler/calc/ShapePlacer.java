@@ -201,18 +201,22 @@ public class ShapePlacer {
     }
 
     private void logProcessingState( State state ) {
-        logger.debug( PRINT_SEPARATOR );
-        logger.debug( "PROCESSING STATE" );
-        logger.debug( "[{}] variantCanBePlaced called", KpiHolder.getVariantCanBePlacedKpi().getValue() );
-        logger.debug( "[{}] preparation time", KpiHolder.getPreparationTimeKpi().getValue() );
-        logger.debug( "[{}] placement time", KpiHolder.getPlacementTimeKpi().getValue() );
-        logger.debug( state.getBoard().print() );
+        if ( logger.isDebugEnabled() ) {
+            logger.debug( PRINT_SEPARATOR );
+            logger.debug( "PROCESSING STATE" );
+            logger.debug( "[{}] variantCanBePlaced called", KpiHolder.getVariantCanBePlacedKpi().getValue() );
+            logger.debug( "[{}] preparation time", KpiHolder.getPreparationTimeKpi().getValue() );
+            logger.debug( "[{}] placement time", KpiHolder.getPlacementTimeKpi().getValue() );
+            logger.debug( state.getBoard().print() );
+        }
     }
 
     private void logFailedPlacement( State state ) {
-        logger.debug( PRINT_SEPARATOR );
-        logger.debug( "PLACEMENT FAILED" );
-        logger.debug( state.getBoard().print() );
+        if ( logger.isDebugEnabled() ) {
+            logger.debug( PRINT_SEPARATOR );
+            logger.debug( "PLACEMENT FAILED" );
+            logger.debug( state.getBoard().print() );
+        }
     }
 
     private void logStoppingExecutionOnSuccess() {

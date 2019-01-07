@@ -37,7 +37,7 @@ public class Application {
     private static void solvePuzzle( String puzzleId ) {
         logger.info( "starting" );
 
-        CalcEngine calcEngine = new CalcEngine( new CheckAreasStrategy(), 2, 3 );
+        CalcEngine calcEngine = new CalcEngine( new CheckAreasStrategy(), 4, 5 );
         // CalcEngine calcEngine = new CalcEngine( new WholeBoardStrategy(), 4 )
 
         addUsedShapesForPuzzle( puzzleId, calcEngine );
