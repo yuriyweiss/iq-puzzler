@@ -100,12 +100,10 @@ public class ShapePlacer {
     }
 
     private Map<ShapeVariant, List<Cell>> buildPossiblePlacementsForEachVariant( State state ) {
-        long startTime = System.currentTimeMillis();
         Map<ShapeVariant, List<Cell>> result = new HashMap<>();
         List<Shape> shapes = state.getNotUsedShapes();
         shapes.forEach( shape -> shape.getVariants()
                 .forEach( shapeVariant -> buildPossiblePlacements( result, shapeVariant ) ) );
-        KpiHolder.getPlacementTimeKpi().inc( System.currentTimeMillis() - startTime );
         return result;
     }
 
@@ -173,7 +171,7 @@ public class ShapePlacer {
         if ( shapePlacerMode == PRODUCER && stateToCheck.getNotUsedShapes().size() <= producerThreshold ) {
             putStateToQueue( stateToCheck );
             logger.debug( "{} ShapePlacer state put to queue", shapePlacerMode );
-            return new ImmutablePair<>( null, NEED_BREAK );
+            return new ImmutablePair<>( null, !NEED_BREAK );
         }
         // when called from consumer, performs full execution chain until result
         State result = new ShapePlacer( calcEngine, stateToCheck,
@@ -195,6 +193,7 @@ public class ShapePlacer {
     private void putStateToQueue( State state ) {
         try {
             calcEngine.getStateQueue().put( state );
+            KpiHolder.getStatesProducedKpi().inc();
         } catch ( InterruptedException e ) {
             Thread.currentThread().interrupt();
         }
@@ -206,7 +205,6 @@ public class ShapePlacer {
             logger.debug( "PROCESSING STATE" );
             logger.debug( "[{}] variantCanBePlaced called", KpiHolder.getVariantCanBePlacedKpi().getValue() );
             logger.debug( "[{}] preparation time", KpiHolder.getPreparationTimeKpi().getValue() );
-            logger.debug( "[{}] placement time", KpiHolder.getPlacementTimeKpi().getValue() );
             logger.debug( state.getBoard().print() );
         }
     }

@@ -2,20 +2,31 @@ package yuriy.weiss.iq.puzzler.kpi;
 
 public class KpiHolder {
     private static CountKpi variantCanBePlacedKpi = new CountKpi();
+    private static CountKpi statesProducedKpi = new CountKpi();
+    private static CountKpi statesConsumedKpi = new CountKpi();
     private static TimeKpi preparationTimeKpi = new TimeKpi();
-    private static TimeKpi placementTimeKpi = new TimeKpi();
+    private static AverageTimeKpi consumerStateAvgTimeKpi = new AverageTimeKpi();
 
-    private KpiHolder() {}
+    private KpiHolder() {
+    }
 
     public static CountKpi getVariantCanBePlacedKpi() {
         return variantCanBePlacedKpi;
+    }
+
+    public static CountKpi getStatesProducedKpi() {
+        return statesProducedKpi;
+    }
+
+    public static CountKpi getStatesConsumedKpi() {
+        return statesConsumedKpi;
     }
 
     public static TimeKpi getPreparationTimeKpi() {
         return preparationTimeKpi;
     }
 
-    public static TimeKpi getPlacementTimeKpi() {
-        return placementTimeKpi;
+    public static AverageTimeKpi getConsumerStateAvgTimeKpi() {
+        return consumerStateAvgTimeKpi;
     }
 }

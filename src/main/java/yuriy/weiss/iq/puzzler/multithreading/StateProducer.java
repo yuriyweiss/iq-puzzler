@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import yuriy.weiss.iq.puzzler.calc.CalcEngine;
 import yuriy.weiss.iq.puzzler.calc.ShapePlacer;
 import yuriy.weiss.iq.puzzler.calc.strategy.BoardPreparationStrategy;
+import yuriy.weiss.iq.puzzler.kpi.KpiHolder;
 import yuriy.weiss.iq.puzzler.model.State;
 
 import static yuriy.weiss.iq.puzzler.multithreading.ShapePlacerMode.PRODUCER;
@@ -30,7 +31,9 @@ public class StateProducer implements Runnable {
         if ( initialState.getNotUsedShapes().size() <= calcEngine.getProducerThreashold() ) {
             try {
                 calcEngine.getStateQueue().put( initialState );
-                logger.debug( "PRODUCER state put to queue" );
+                KpiHolder.getStatesProducedKpi().inc();
+                logger.info( "threshold is greater than not used shapes size" );
+                logger.info("state sent directly to consumer");
             } catch ( InterruptedException e ) {
                 Thread.currentThread().interrupt();
             }

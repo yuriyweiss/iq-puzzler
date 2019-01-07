@@ -70,7 +70,7 @@ public class CalcEngine {
         }
         // create log timer
         logTimer = new Timer();
-        logTimer.scheduleAtFixedRate( new LogTimerTask(), 5000L, 5000L );
+        logTimer.scheduleAtFixedRate( new LogTimerTask(this), 5000L, 5000L );
     }
 
     public void onStateSuccess() {
@@ -78,7 +78,6 @@ public class CalcEngine {
         logger.info( "PLACEMENT SUCCESS" );
         logger.info( "[{}] variantCanBePlaced called", KpiHolder.getVariantCanBePlacedKpi().getValue() );
         logger.info( "[{}] preparation time", KpiHolder.getPreparationTimeKpi().getValue() );
-        logger.info( "[{}] placement time", KpiHolder.getPlacementTimeKpi().getValue() );
         logger.info( successState.getBoard().print() );
 
         threadPool.shutdownNow();

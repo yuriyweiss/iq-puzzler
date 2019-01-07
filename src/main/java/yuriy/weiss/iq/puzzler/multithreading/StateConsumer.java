@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import yuriy.weiss.iq.puzzler.calc.CalcEngine;
 import yuriy.weiss.iq.puzzler.calc.ShapePlacer;
 import yuriy.weiss.iq.puzzler.calc.strategy.BoardPreparationStrategy;
+import yuriy.weiss.iq.puzzler.kpi.KpiHolder;
 import yuriy.weiss.iq.puzzler.model.State;
 
 import java.util.concurrent.TimeUnit;
@@ -29,15 +30,20 @@ public class StateConsumer implements Runnable {
     public void run() {
         try {
             State state = calcEngine.getStateQueue().poll( 2, TimeUnit.SECONDS );
+            KpiHolder.getStatesConsumedKpi().inc();
             while ( state != null && calcEngine.getSuccessState() == null ) {
                 logger.debug( "CONSUMER {} state taken from queue", consumerId );
+                long startTime = System.currentTimeMillis();
                 State result = new ShapePlacer( calcEngine, state, boardPreparationStrategy, CONSUMER )
                         .tryPlaceNotUsedShapes();
                 if ( result != null && result.isPlacementSuccess() ) {
                     calcEngine.setSuccessState( result );
                     calcEngine.onStateSuccess();
                 }
+                KpiHolder.getConsumerStateAvgTimeKpi().inc(System.currentTimeMillis() - startTime);
                 state = calcEngine.getStateQueue().poll( 2, TimeUnit.SECONDS );
+                KpiHolder.getStatesConsumedKpi().inc();
+
             }
         } catch ( InterruptedException e ) {
             Thread.currentThread().interrupt();
