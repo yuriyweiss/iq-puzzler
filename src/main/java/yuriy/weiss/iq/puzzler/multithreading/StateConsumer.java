@@ -40,7 +40,7 @@ public class StateConsumer implements Runnable {
                     calcEngine.setSuccessState( result );
                     calcEngine.onStateSuccess();
                 }
-                KpiHolder.getConsumerStateAvgTimeKpi().inc(System.currentTimeMillis() - startTime);
+                KpiHolder.getConsumerStateAvgTimeKpi().inc( System.currentTimeMillis() - startTime );
                 state = calcEngine.getStateQueue().poll( 2, TimeUnit.SECONDS );
                 KpiHolder.getStatesConsumedKpi().inc();
 

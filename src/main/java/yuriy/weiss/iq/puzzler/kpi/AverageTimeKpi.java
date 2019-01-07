@@ -9,12 +9,12 @@ public class AverageTimeKpi {
     private AtomicLong totalTime = new AtomicLong( 0L );
     private AtomicLong totalCount = new AtomicLong( 0L );
 
-    public void inc(long time) {
-        totalTime.getAndAdd(time);
+    public void inc( long time ) {
+        totalTime.getAndAdd( time );
         totalCount.getAndIncrement();
     }
 
     public double getValue() {
-        return ((double)totalTime.get())/totalCount.get();
+        return ( ( double ) totalTime.get() ) / totalCount.get();
     }
 }

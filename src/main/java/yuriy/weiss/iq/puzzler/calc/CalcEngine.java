@@ -70,7 +70,7 @@ public class CalcEngine {
         }
         // create log timer
         logTimer = new Timer();
-        logTimer.scheduleAtFixedRate( new LogTimerTask(this), 5000L, 5000L );
+        logTimer.scheduleAtFixedRate( new LogTimerTask( this ), 5000L, 5000L );
     }
 
     public void onStateSuccess() {

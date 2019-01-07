@@ -33,7 +33,7 @@ public class StateProducer implements Runnable {
                 calcEngine.getStateQueue().put( initialState );
                 KpiHolder.getStatesProducedKpi().inc();
                 logger.info( "threshold is greater than not used shapes size" );
-                logger.info("state sent directly to consumer");
+                logger.info( "state sent directly to consumer" );
             } catch ( InterruptedException e ) {
                 Thread.currentThread().interrupt();
             }

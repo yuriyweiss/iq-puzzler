@@ -12,18 +12,18 @@ public class LogTimerTask extends TimerTask {
 
     private final CalcEngine calcEngine;
 
-    public LogTimerTask(CalcEngine calcEngine) {
+    public LogTimerTask( CalcEngine calcEngine ) {
         this.calcEngine = calcEngine;
     }
 
     @Override
     public void run() {
-        logger.info("");
-        logger.info("[{}] variantCanBePlaced called", KpiHolder.getVariantCanBePlacedKpi().getValue());
-        logger.info("[{}] states PRODUCED", KpiHolder.getStatesProducedKpi().getValue());
-        logger.info("[{}] states CONSUMED", KpiHolder.getStatesConsumedKpi().getValue());
-        logger.info("[{}] queue size", calcEngine.getStateQueue().size());
-        logger.info("[{}] consumer AVG processing time", KpiHolder.getConsumerStateAvgTimeKpi().getValue());
-        //logger.info("[{}] preparation time", KpiHolder.getPreparationTimeKpi().getValue());
+        logger.info( "" );
+        logger.info( "[{}] variantCanBePlaced called", KpiHolder.getVariantCanBePlacedKpi().getValue() );
+        logger.info( "[{}] states PRODUCED", KpiHolder.getStatesProducedKpi().getValue() );
+        logger.info( "[{}] states CONSUMED", KpiHolder.getStatesConsumedKpi().getValue() );
+        logger.info( "[{}] queue size", calcEngine.getStateQueue().size() );
+        logger.info( "[{}] consumer AVG processing time", KpiHolder.getConsumerStateAvgTimeKpi().getValue() );
+        logger.info( "[{}] preparation time", KpiHolder.getPreparationTimeKpi().getValue() );
     }
 }
